@@ -10,8 +10,11 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.options;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -436,5 +439,18 @@ class MinimartIntegrationTest {
         mockMvc.perform(get("/actuator/health"))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.status", is("UP")));
+
+        mockMvc.perform(get("/"))
+            .andExpect(status().isOk())
+            .andExpect(content().string("Minimart POS API is running"));
+
+        mockMvc.perform(get("/duong-dan-khong-ton-tai"))
+            .andExpect(status().isNotFound());
+
+        mockMvc.perform(options("/api/products")
+                .header("Origin", "https://mini-mart-pos-orpin.vercel.app")
+                .header("Access-Control-Request-Method", "GET"))
+            .andExpect(status().isOk())
+            .andExpect(header().string("Access-Control-Allow-Origin", "https://mini-mart-pos-orpin.vercel.app"));
     }
 }

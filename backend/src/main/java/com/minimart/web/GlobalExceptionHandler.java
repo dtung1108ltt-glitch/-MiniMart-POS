@@ -20,6 +20,8 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
+import org.springframework.web.servlet.NoHandlerFoundException;
+import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 /**
  * Bộ xử lý ngoại lệ tập trung chuẩn RFC 7807 ProblemDetail với thông báo tiếng Việt, không lộ stack trace.
@@ -79,6 +81,16 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ProblemDetail> handleNotFound(RuntimeException ex) {
         ProblemDetail pd = ProblemDetail.forStatusAndDetail(HttpStatus.NOT_FOUND, ex.getMessage());
         pd.setTitle("Không tìm thấy dữ liệu");
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(pd);
+    }
+
+    @ExceptionHandler({NoResourceFoundException.class, NoHandlerFoundException.class})
+    public ResponseEntity<ProblemDetail> handleResourceNotFound(Exception ex) {
+        ProblemDetail pd = ProblemDetail.forStatusAndDetail(
+            HttpStatus.NOT_FOUND,
+            "Không tìm thấy đường dẫn hoặc tài nguyên yêu cầu"
+        );
+        pd.setTitle("Không tìm thấy trang");
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(pd);
     }
 

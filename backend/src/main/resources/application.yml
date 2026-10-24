@@ -41,7 +41,7 @@ springdoc:
     path: /v3/api-docs
 
 app:
-  allowed-origins: ${ALLOWED_ORIGINS:http://localhost:5173,http://localhost:3000,http://127.0.0.1:5173}
+  allowed-origins: ${ALLOWED_ORIGINS:http://localhost:5173,http://localhost:3000,http://127.0.0.1:5173,https://mini-mart-pos-orpin.vercel.app}
   usd-vnd-rate: ${APP_USD_VND_RATE:25000}
   demo-readonly: ${DEMO_READONLY:false}
   external-api-base-url: ${EXTERNAL_API_BASE_URL:https://dummyjson.com}
