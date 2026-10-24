@@ -1,0 +1,38 @@
+@startuml MiniMart_ER_Diagram
+hide circle
+skinparam linetype ortho
+
+entity "product" as product {
+  * **product_id** : VARCHAR(20) <<PK>>
+  --
+  * name : VARCHAR(100)
+  * price : NUMERIC(14,0)
+  * quantity : INT
+  * category : VARCHAR(50)
+  expiry_date : DATE
+  brand : VARCHAR(100)
+  * version : BIGINT
+}
+
+entity "invoice" as invoice {
+  * **invoice_id** : VARCHAR(20) <<PK>>
+  --
+  * invoice_date : TIMESTAMP
+  * total_amount : NUMERIC(14,0)
+  * discount : NUMERIC(14,0)
+  * status : VARCHAR(20)
+}
+
+entity "invoice_detail" as invoice_detail {
+  * **detail_id** : BIGINT <<PK, IDENTITY>>
+  --
+  * invoice_id : VARCHAR(20) <<FK>>
+  * product_id : VARCHAR(20) <<FK>>
+  * quantity : INT
+  * unit_price : NUMERIC(14,0)
+  * subtotal : NUMERIC(14,0)
+}
+
+invoice ||--o{ invoice_detail : "1 hóa đơn có nhiều chi tiết"
+product ||--o{ invoice_detail : "tham chiếu sản phẩm (lưu đơn giá lịch sử)"
+@enduml

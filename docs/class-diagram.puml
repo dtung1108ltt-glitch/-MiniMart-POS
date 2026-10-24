@@ -1,0 +1,139 @@
+@startuml MiniMart_Class_Diagram
+skinparam classAttributeIconSize 0
+skinparam monochrome false
+skinparam packageStyle rectangle
+
+package "com.minimart.domain" {
+    abstract class Product {
+        - productId : String
+        - name : String
+        - price : BigDecimal
+        - quantity : int
+        - version : Long
+        + Product(productId: String, name: String, price: BigDecimal, quantity: int)
+        + getProductId() : String
+        + getName() : String
+        + getPrice() : BigDecimal
+        + getQuantity() : int
+        + setPrice(price: BigDecimal) : void
+        + setQuantity(quantity: int) : void
+        + {abstract} getCategory() : String
+        + {abstract} getCategoryCode() : String
+    }
+
+    class FoodProduct extends Product {
+        - expiryDate : LocalDate
+        + getExpiryDate() : LocalDate
+        + isExpired() : boolean
+        + isExpiringSoon(days: int) : boolean
+        + getCategory() : String
+        + getCategoryCode() : String
+    }
+
+    class HouseholdProduct extends Product {
+        - brand : String
+        + getBrand() : String
+        + getCategory() : String
+        + getCategoryCode() : String
+    }
+
+    class CartItem {
+        - product : Product
+        - quantity : int
+        - unitPrice : BigDecimal
+        + getSubtotal() : BigDecimal
+    }
+
+    enum InvoiceStatus {
+        COMPLETED
+        CANCELLED
+    }
+
+    class Invoice {
+        - invoiceId : String
+        - invoiceDate : LocalDateTime
+        - discount : BigDecimal
+        - totalAmount : BigDecimal
+        - status : InvoiceStatus
+        - details : List<InvoiceDetail>
+        + addItem(cartItem: CartItem) : void
+        + addItem(product: Product, quantity: int) : void
+        + calculateSubtotal() : BigDecimal
+        + calculateTotal(policy: DiscountPolicy) : BigDecimal
+        + getInvoiceDate() : LocalDateTime
+    }
+
+    class InvoiceDetail {
+        - detailId : Long
+        - productId : String
+        - quantity : int
+        - unitPrice : BigDecimal
+        - subtotal : BigDecimal
+        + getSubtotal() : BigDecimal
+    }
+
+    interface DiscountPolicy <<FunctionalInterface>> {
+        + calculateDiscount(total: BigDecimal) : BigDecimal
+    }
+
+    class DiscountPolicies {
+        + {static} NONE : String
+        + {static} PERCENT5_OVER_500K : String
+        + {static} PERCENT10_OVER_1M : String
+        + {static} FIXED_20K : String
+        + {static} resolve(code: String) : DiscountPolicy
+    }
+}
+
+package "com.minimart.service & api" {
+    class ProductManager {
+        + addProduct(product: Product) : Product
+        + updateProduct(...) : Product
+        + deleteProduct(productId: String) : void
+        + searchByKeyword(keyword: String) : List<Product>
+        + findProducts(...) : Page<Product>
+    }
+
+    class SalesManager {
+        + previewSale(items: List<SaleItemCommand>, discountPolicyCode: String) : SalePreviewResult
+        + checkout(items: List<SaleItemCommand>, discountPolicyCode: String, amountPaid: BigDecimal) : Invoice
+        + cancelInvoice(invoiceId: String) : Invoice
+    }
+
+    class StatisticsService {
+        + getSummary(from: LocalDate, to: LocalDate) : StatsSummary
+        + getDailyRevenue(from: LocalDate, to: LocalDate) : List<DailyRevenuePoint>
+        + getRevenueByCategory(from: LocalDate, to: LocalDate) : List<CategoryRevenuePoint>
+        + getTopProducts(from: LocalDate, to: LocalDate, limit: int) : List<TopProductPoint>
+    }
+
+    class ApiService {
+        - client : HttpClient
+        - baseUrl : String
+        - usdVndRate : BigDecimal
+        + fetchData() : String
+        + fetchExternalProducts(limit: int, query: String) : List<ExternalProductDto>
+    }
+}
+
+package "com.minimart.swing (Desktop Client)" {
+    class MainFrame {
+        - apiClient : ApiClient
+        + validateProductInputs(...) : void
+        + loadProducts(query: String) : void
+    }
+}
+
+Invoice "1" *-- "1..*" InvoiceDetail : contains
+Invoice ..> CartItem : adds
+CartItem --> Product : references
+DiscountPolicies ..> DiscountPolicy : creates via Lambda
+SalesManager --> Product : updates stock
+SalesManager --> Invoice : creates / cancels
+SalesManager --> DiscountPolicy : applies
+ProductManager --> Product : manages
+StatisticsService --> Invoice : aggregates COMPLETED
+MainFrame ..> ProductManager : via REST API
+MainFrame ..> SalesManager : via REST API
+MainFrame ..> ApiService : via REST API
+@enduml

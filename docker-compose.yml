@@ -1,0 +1,44 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: minimart-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: minimart
+      POSTGRES_USER: minimart
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-minimart}
+      TZ: Asia/Ho_Chi_Minh
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U minimart -d minimart"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: minimart-backend
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      SPRING_PROFILES_ACTIVE: prod
+      PORT: 8080
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/minimart
+      SPRING_DATASOURCE_USERNAME: minimart
+      SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD:-minimart}
+      ALLOWED_ORIGINS: http://localhost:5173,http://localhost:3000
+      APP_USD_VND_RATE: 25000
+      DEMO_READONLY: "false"
+      TZ: Asia/Ho_Chi_Minh
+    ports:
+      - "8080:8080"
+
+volumes:
+  postgres_data:

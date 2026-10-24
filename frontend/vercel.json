@@ -1,0 +1,16 @@
+{
+  "rewrites": [
+    {
+      "source": "/api/:path*",
+      "destination": "https://TEN-BACKEND.onrender.com/api/:path*"
+    },
+    {
+      "source": "/actuator/:path*",
+      "destination": "https://TEN-BACKEND.onrender.com/actuator/:path*"
+    },
+    {
+      "source": "/((?!api/|actuator/).*)",
+      "destination": "/index.html"
+    }
+  ]
+}

@@ -1,0 +1,21 @@
+# Maven / Java
+**/target/
+!**/.mvn/wrapper/maven-wrapper.jar
+*.log
+
+# Node / Frontend
+**/node_modules/
+**/dist/
+.vite/
+
+# Environment & Secrets (Quy tắc 0.3.6: Không commit bí mật)
+.env
+.env.local
+.env.*.local
+
+# IDEs & OS
+.idea/
+*.iml
+.vscode/
+.DS_Store
+Thumbs.db

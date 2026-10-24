@@ -1,0 +1,30 @@
+services:
+  - type: web
+    name: minimart-backend
+    runtime: docker
+    rootDir: backend
+    plan: free
+    healthCheckPath: /actuator/health
+    envVars:
+      - key: SPRING_PROFILES_ACTIVE
+        value: prod
+      - key: PORT
+        value: 8080
+      - key: TZ
+        value: Asia/Ho_Chi_Minh
+      - key: APP_USD_VND_RATE
+        value: 25000
+      - key: DEMO_READONLY
+        value: "false"
+      - key: ALLOWED_ORIGINS
+        value: https://TEN-FRONTEND-CUA-BAN.vercel.app,http://localhost:5173
+      - key: DATABASE_URL
+        fromDatabase:
+          name: minimart-postgres
+          property: connectionString
+
+databases:
+  - name: minimart-postgres
+    databaseName: minimart
+    user: minimart
+    plan: free
